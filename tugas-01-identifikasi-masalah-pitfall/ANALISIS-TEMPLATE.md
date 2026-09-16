@@ -4,9 +4,8 @@
 
 | Nama | NIM | Kontribusi |
 |---|---|---|
-| [Assyifa] | [nim] | [pitfall/bagian yang dikerjakan] |
-| [nama 2] | [nim] | [pitfall/bagian yang dikerjakan] |
-| [nama 3] | [nim] | [pitfall/bagian yang dikerjakan] |
+| Assyifa Dwi Safitri | 103072400064 | [pitfall/bagian yang dikerjakan] |
+| Amirah Essary Yunsarah Sujuthi | 103072400077 | [pitfall/bagian yang dikerjakan] |
 
 ## Pitfall 1: [nama pitfall] — ditulis oleh [nama]
 
