@@ -21,19 +21,28 @@
 
 ---
 
-## Pitfall 2: [nama pitfall] — ditulis oleh [nama]
+## Pitfall 2: Latency is Zero — ditulis oleh Assyifa Dwi Safitri
 
-**Bukti di skenario:**
-**Kenapa ini keliru:**
-**Dampak ke FoodGo:**
-**Solusi desain awal:**
-**Trade-off:** 
+**Bukti di skenario:** Modul pesanan memanggil modul pembayaran dan menunggu respons tanpa batas waktu. Selain itu, aplikasi FoodGo menjadi sangat lambat dan beberapa permintaan mengalami timeout ketika terjadi lonjakan pesanan.
+
+**Kenapa ini keliru:** Menganggap latency atau waktu yang dibutuhkan untuk komunikasi antar service tidak menjadi masalah merupakan asumsi yang keliru dalam sistem distribusi. Komunikasi antar service membutuhkan waktu karena harus melalui jaringan, sehingga respons tidak selalu langsung diterima. Waktu respons juga dapat meningkat ketika service sedang mengalami beban yang tinggi. Pada kasus FoodGo, modul pesananan harus menunggu respons dari modul pembayaran, sehingga keterlambatan pada modul pembayaran dapat memengaruhi proses pemesanan.
+
+**Dampak ke FoodGo:** Ketika trafik meningkat, waktu respons modul pembayaran dapat menjadi lebih lama. Sehingga, modul pesanan yang menunggu respons tersebut akan membuat semakin banyak permintaan tertahan. Akibatnya, waktu pemrosesan pesanan menjadi semakin lama, aplikasi terasa lambat, dan beberapa permintaan akhirnya mengalami timeout. Jika permintaan yang tertahan terus bertambah, penggunaan resource server juga dapat meningkat dan berkontribusi terhadap crash.
+
+**Solusi desain awal:** FoodGo dapat menetapkan timeout yang sesuai pada komunikasi antar service agar modul pesanan tidak menunggu respons yang terlalu lama. Selain itu, proses yang tidak harus mendapatkan respons secara langsung dapat menggunakan komunikasi asynchronous atau message queue, sehingga modul pesanan tidak perlu terus menunggu modul lain menyelesaikan prosesnya.
+
+**Trade-off:** Penggunaan komunikasi asynchronous dapat membuat sistem lebih responsif dan mampu menghadapi lonjakan trafik, tetapi hasil dari suatu proses tidak selalu dapat diterima secara langsung oleh pengguna. Sistem juga perlu menangani status sementara, seperti pesanan atau pembayaran yang masih dalam proses.
+
+---
 
 ## Pitfall 3: Single Point of Failure akibat Arsitektur Monolitik — ditulis oleh Assyifa & Amirah
 
-**Bukti di skenario:**
-**Kenapa ini keliru:**
-**Dampak ke FoodGo:**
+**Bukti di skenario:** Saat trafik meningkat, satu server menangani seluruh modul FoodGo seperti pesanan, pembayaran, dan notifikasi kurir. Semua modul tersebut berjalan dalam satu proses monolitik yang sama sehingga server menjadi kewalahan.
+
+**Kenapa ini keliru:** Menggabungkan seluruh fungsi dalam satu server dan satu proses membuat sistem memiliki satu titik kegagalan. Jika server mengalami gangguan atau salah satu modul membutuhkan beban besar, modul lain yang berjalan pada server yang sama dapat ikut terdampak.
+
+**Dampak ke FoodGo:** Ketika jumlah pesanan meningkat, server harus menangani proses pesanan, pembayaran, dan notifikasi secara bersamaan. Kondisi ini menyebabkan sistem sulit menangani lonjakan trafik. Jika server mengalami kegagalan, seluruh layanan FoodGo dapat ikut berhenti dan membutuhkan restart manual.
+
 **Solusi desain awal:**
 **Trade-off:** 
 
