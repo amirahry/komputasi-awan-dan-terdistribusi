@@ -4,8 +4,8 @@
 
 | Nama | NIM | Kontribusi |
 |---|---|---|
-| Assyifa Dwi Safitri | 103072400064 | [pitfall/bagian yang dikerjakan] |
-| Amirah Essary Yunsarah Sujuthi | 103072400077 | [pitfall/bagian yang dikerjakan] |
+| Assyifa Dwi Safitri | 103072400064 | Pitfall 2 (Latency is Zero) dan Pitfall 3 (solusi & trade-off) |
+| Amirah Essary Yunsarah Sujuthi | 103072400077 | Pitfall 1 (The network is reliable) dan Pitfall 3 (analisis masalah & dampak) |
 
 ## Pitfall 1: The network is reliable — ditulis oleh Amirah Essary Yunsarah Sujuthi
 
@@ -43,11 +43,13 @@
 
 **Dampak ke FoodGo:** Ketika jumlah pesanan meningkat, server harus menangani proses pesanan, pembayaran, dan notifikasi secara bersamaan. Kondisi ini menyebabkan sistem sulit menangani lonjakan trafik. Jika server mengalami kegagalan, seluruh layanan FoodGo dapat ikut berhenti dan membutuhkan restart manual.
 
-**Solusi desain awal:**
-**Trade-off:** 
+**Solusi desain awal:** FoodGo dapat memisahkan modul utama menjadi beberapa service agar setiap bagian dapat berjalan secara lebih independen. Selain itu, scalling dapat dilakukan pada service yang membutuhkan kapasitas lebih besar dan load balancing dapat digunakan untuk membagi beban permintaan agar tidak bergantung pada satu server saja.
+
+**Trade-off:** Pemisahan service dapat meningkatkan fleksibilitas sistem dan mengurangi dampak kegagalan pada satu bagian, tetapi membuat arsitektur menjadi lebih kompleks. FoodGo perlu melakukan pengelolaan tambahan seperti monitoring, komunikasi antar service, dan proses deployment.
 
 ---
 
 ## Kesimpulan Kelompok
+Berdasarkan hasil analisis, masalah utama FoodGo disebabkan oleh arsitektur monolitik dan kurangnya mekanisme dalam menangani gangguan komunikasi antar service. Untuk memperbaiki masalah tersebut, FoodGo dapat menerapkan Service-Oriented Architecture (SOA) dengan memisahkan modul pesanan, pembayaran, katalog resto, dan notifikasi menjadi service yang berbeda.
 
-[Ringkasan: jika FoodGo memperbaiki ketiga pitfall ini, apa arsitektur yang disarankan secara garis besar? Kaitkan dengan Tugas 2.]
+Selain itu, pola Publish-Subscribe dapat digunakan pada proses seperti notifikasi agar antar modul tidak saling bergantung secara langsung. Arsitektur ini dapat membantu FoodGo meningkatkan skalabilitas dan mengurangi dampak kegagalan pada satu bagian sistem, meskipun membutuhkan pengelolaan komunikasi antar service dan monitoring yang lebih kompleks. 
