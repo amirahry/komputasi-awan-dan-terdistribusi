@@ -27,6 +27,8 @@
 (ulangi struktur di atas)
 bla bla blaaa
 ini bukan generate ai
+done
+
 
 ---
 
