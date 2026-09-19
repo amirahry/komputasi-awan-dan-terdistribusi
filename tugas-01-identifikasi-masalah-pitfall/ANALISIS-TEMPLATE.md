@@ -11,11 +11,11 @@
 
 **Bukti di skenario:** Tim menemukan bahwa kode mereka menulis asumsi seperti "# network is always reliable, no need for retry" dan tidak ada timeout sama sekali pada pemanggilan antar service. Modul pesanan memanggil modul pembayaran dan menunggu respons tanpa batas waktu.
 
-**Kenapa ini keliru:** Menganggap jaringan selalu reliable merupakan asumsi yang keliru dan tidak sesuai dengan kondisi sistem terdistribusi nyata. Komunikasi antar service dapat mengalami berbagai gangguan, seperti keterlambatan respons, koneksi gagal, atau service tujuan yang sedang mengalami masalah. Pada kasus FoodGo, tidak adanya timeout dan retry membuat sistem tidak memiliki mekanisme untuk menangani gangguan komunikasi antar service.
+**Kenapa ini keliru:** Menganggap jaringan selalu reliable merupakan asumsi yang keliru dan tidak sesuai dengan kondisi sistem terdistribusi nyata. Komunikasi antar service dapat mengalami berbagai gangguan, seperti keterlambatan respons, koneksi gagal, atau service tujuan yang sedang mengalami masalah. Pada kasus FoodGo, tidak adanya timeout dan retry membuat sistem tidak memiliki mekanisme untuk menangani gangguan komunikasi antar service. Selain itu, masalah pada asumsi ini berbeda dengan masalah laency. Pada *The network is realiable*, fokus utamanya adalah kegagalan atau ketidakpastian komunikasi antar service, sedangkan keterlambatan respons dibahas pada konsep *Latency is zero*.
 
 **Dampak ke FoodGo:** Tidak adanya timeout dan retry membuat modul pesanan terus menunggu respons dari modul pembayaran ketika terjadi keterlambatan. Saat trafik meningkat, banyak permintaan yang tertahan sehingga proses pemesanan menjadi semakin lambat. Akibatnya, performa aplikasi menurun dan dapat menyebabkan sistem mengalami crash.
 
-**Solusi desain awal:** FoodGo dapat menerapkan timeout pada komunikasi antar service agar proses tidak menunggu tanpa batas waktu. Selain itu, retry dengan batas percobaan tertentu dapat digunakan untuk menangani gangguan sementara. Jika modul pembayaran terus mengalami masalah, circuit breaker dapat digunakan untuk membatasi dampak agar tidak menyebar ke service lain.
+**Solusi desain awal:** FoodGo dapat menerapkan timeout pada komunikasi antar service agar proses tidak menunggu tanpa batas waktu. Selain itu, retry dengan batas percobaan tertentu dapat digunakan untuk menangani gangguan sementara. Jika modul pembayaran terus mengalami masalah, circuit breaker dapat digunakan untuk membatasi dampak agar tidak menyebar ke service lain. Penggunaan retry juga perlu diberikan batas jumlah percobaan serta jeda tertentu agar tidak menambah beban ketika service sedang mengalami gangguan.
 
 **Trade-off:** Retry dapat membantu mengatasi gangguan sementara, tetapi jika service sedang mengalami overload, percobaan ulang dapat menambah beban dan memperparah kondisi sistem.
 
@@ -25,11 +25,11 @@
 
 **Bukti di skenario:** Modul pesanan memanggil modul pembayaran dan menunggu respons tanpa batas waktu. Selain itu, aplikasi FoodGo menjadi sangat lambat dan beberapa permintaan mengalami timeout ketika terjadi lonjakan pesanan.
 
-**Kenapa ini keliru:** Menganggap latency atau waktu yang dibutuhkan untuk komunikasi antar service tidak menjadi masalah merupakan asumsi yang keliru dalam sistem distribusi. Komunikasi antar service membutuhkan waktu karena harus melalui jaringan, sehingga respons tidak selalu langsung diterima. Waktu respons juga dapat meningkat ketika service sedang mengalami beban yang tinggi. Pada kasus FoodGo, modul pesananan harus menunggu respons dari modul pembayaran, sehingga keterlambatan pada modul pembayaran dapat memengaruhi proses pemesanan.
+**Kenapa ini keliru:** Menganggap latency atau waktu yang dibutuhkan untuk komunikasi antar service tidak menjadi masalah merupakan asumsi yang keliru dalam sistem distribusi. Komunikasi antar service membutuhkan waktu karena harus melalui jaringan, sehingga respons tidak selalu langsung diterima. Waktu respons juga dapat meningkat ketika service sedang mengalami beban yang tinggi. Oleh karena itu, meskipun jaringan masih berjalan normal dan permintaan berhasil dikirim, sistem tetap harus memperhitungkan waktu perjalanan data serta kemungkinan antrean proses ketika jumlah permintaan meningkat. Pada kasus FoodGo, modul pesananan harus menunggu respons dari modul pembayaran, sehingga keterlambatan pada modul pembayaran dapat memengaruhi proses pemesanan.
 
 **Dampak ke FoodGo:** Ketika trafik meningkat, waktu respons modul pembayaran dapat menjadi lebih lama. Sehingga, modul pesanan yang menunggu respons tersebut akan membuat semakin banyak permintaan tertahan. Akibatnya, waktu pemrosesan pesanan menjadi semakin lama, aplikasi terasa lambat, dan beberapa permintaan akhirnya mengalami timeout. Jika permintaan yang tertahan terus bertambah, penggunaan resource server juga dapat meningkat dan berkontribusi terhadap crash.
 
-**Solusi desain awal:** FoodGo dapat menetapkan timeout yang sesuai pada komunikasi antar service agar modul pesanan tidak menunggu respons yang terlalu lama. Selain itu, proses yang tidak harus mendapatkan respons secara langsung dapat menggunakan komunikasi asynchronous atau message queue, sehingga modul pesanan tidak perlu terus menunggu modul lain menyelesaikan prosesnya.
+**Solusi desain awal:** FoodGo dapat menetapkan timeout yang sesuai pada komunikasi antar service agar modul pesanan tidak menunggu respons yang terlalu lama. Selain itu, proses yang tidak harus mendapatkan respons secara langsung dapat menggunakan komunikasi asynchronous atau message queue, sehingga modul pesanan tidak perlu terus menunggu modul lain menyelesaikan prosesnya. Pendekatan asychronous lebih sesuai digunakan pada proses yang tidak membutuhkan hasil secara langsung, seperti pengiriman notifikasi, sehingga proses utama pengguna tetap dapat berjalan lebih cepat.
 
 **Trade-off:** Penggunaan komunikasi asynchronous dapat membuat sistem lebih responsif dan mampu menghadapi lonjakan trafik, tetapi hasil dari suatu proses tidak selalu dapat diterima secara langsung oleh pengguna. Sistem juga perlu menangani status sementara, seperti pesanan atau pembayaran yang masih dalam proses.
 
@@ -45,7 +45,7 @@
 
 **Solusi desain awal:** FoodGo dapat memisahkan modul utama menjadi beberapa service agar setiap bagian dapat berjalan secara lebih independen. Selain itu, scalling dapat dilakukan pada service yang membutuhkan kapasitas lebih besar dan load balancing dapat digunakan untuk membagi beban permintaan agar tidak bergantung pada satu server saja.
 
-**Trade-off:** Pemisahan service dapat meningkatkan fleksibilitas sistem dan mengurangi dampak kegagalan pada satu bagian, tetapi membuat arsitektur menjadi lebih kompleks. FoodGo perlu melakukan pengelolaan tambahan seperti monitoring, komunikasi antar service, dan proses deployment.
+**Trade-off:** Pemisahan service dapat meningkatkan fleksibilitas sistem dan mengurangi dampak kegagalan pada satu bagian, tetapi membuat arsitektur menjadi lebih kompleks. FoodGo perlu melakukan pengelolaan tambahan seperti monitoring, komunikasi antar service, dan proses deployment. Selain itu, proses migrasi dari monolitik ke service terpisah perlu dilakukan secara bertahap agar tidak mengganggu layanan yang sudah berjalan.
 
 ---
 
