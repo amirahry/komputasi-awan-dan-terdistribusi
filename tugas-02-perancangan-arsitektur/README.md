@@ -188,7 +188,6 @@ Walaupun memberikan fleksibilitas lebih tinggi, arsitektur ini memiliki beberapa
   FoodGo perlu menangani status sementara seperti processing atau waiting confirmation.
 
 ## Kesimpulan
-
   SOA dengan pola Publish-Subscribe dapat menjadi solusi untuk masalah arsitektur FoodGo karena mampu memisahkan service utama dan mengurangi ketergantungan antar komponen.
 
   Service seperti Pesanan, Pembayaran, Katalog Resto, dan Kurir dapat berkembang secara independen. Namun, pendekatan ini membutuhkan pengelolaan tambahan seperti message broker, monitoring, dan mekanisme penanganan kegagalan komunikasi.
