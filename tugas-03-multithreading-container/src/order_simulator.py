@@ -17,7 +17,7 @@ NUM_WORKERS = 10        # jumlah thread pekerja
 processed_count = 0 
  
 # TODO 1: Buat objek Lock di sini untuk melindungi `processed_count`. 
-lock = threading.Lock()
+lock = threading.Lock()         #Lock untuk mencegah race condition
  
  
 def process_order(order_id: int) -> None: 
@@ -41,7 +41,7 @@ def process_order(order_id: int) -> None:
 
     # PERCOBAAN DENGAN LOCK (versi akhir untuk mencegah race condition).
     with lock:
-        processed_count += 1    
+        processed_count += 1   
  
 def worker(order_ids: list) -> None:  
     """Satu thread pekerja memproses sekumpulan order_id.""" 
@@ -90,6 +90,8 @@ def main() -> None:
     print(f"Total pesanan diproses: {processed_count} (seharusnya {NUM_ORDERS})") 
     if processed_count != NUM_ORDERS: 
         print("RACE CONDITION TERDETEKSI - lengkapi TODO 1 & TODO 2 dengan Lock!") 
+    else:
+        print("Semua pesanan berhasil diproses dengan aman")
  
  
 if __name__ == "__main__": 
