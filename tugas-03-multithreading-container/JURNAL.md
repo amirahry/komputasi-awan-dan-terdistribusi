@@ -19,7 +19,7 @@ temp = processed_count
 time.sleep(0.01)
 processed_count = temp + 1
 ```
-Pada proses tersebut, thread membaca nilai processed_count menyimpannya sementara pada temp, lalu melakukan penambahan nilai time.sleep(0.01)digunakan untuk memperbesar kemungkinan terjadinya konflik antar thread agar race condition lebih mudah diamati. 
+Pada proses tersebut, thread membaca nilai processed_count menyimpannya sementara pada temp, lalu melakukan penambahan nilai. time.sleep(0.01)digunakan untuk memperbesar kemungkinan terjadinya konflik antar thread agar race condition lebih mudah diamati. 
 
 Ketika beberapa threads mengakses processed_count secara bersamaan, beberapa thread dapat membaca nilai lama yang sama sehingga perubahan nilai dapat tertimpa. Akibatnya, sebagian proses increment tidak tercatat dan hasil akhir processed_count menjadi kurang dari jumlah pesanan sebenarnya serta dapat berbeda setiap kali program dijalankan.
 
@@ -37,12 +37,25 @@ Penggunaan 'Lock' dilakukan untuk melindungi akses terhadap variabel bersama (`p
 with lock:
     processed_count += 1
 ```
-Kode tersebut digunakan untuk mengunci proses perubahan nilai processed_count. Saat satu thread sedang menjalankan proses increment, thread lain harus menunggu sampai proses tersebut selesai, Dengan cara ini, perubaha nilai tidak dilakukan secara bersamaan sehingga data tidak saling tertimpa. Dengan lock membuat setiap proses penambaha tercatat dengan benar, sehingga kondisi race condition dapat dicegah dan hasil akhir tetap sesuai dengan jumlah pesanan yang diproses.
+Kode tersebut digunakan untuk mengunci proses perubahan nilai processed_count atau membuat bagian increment menjadi area kritis (critical section). Ketika satu thread sedang menjalankan proses increment, thread lain harus menunggu sampai proses tersebut selesai. Dengan cara ini, perubahan nilai tidak dilakukan secara bersamaan sehingga data tidak saling tertimpa.
+
+Dengan lock membuat setiap proses penambahan tercatat dengan benar, sehingga race condition dapat dicegah dan hasil akhir tetap sesuai dengan jumlah pesanan yang diproses.
 
 ## Kendala Docker
 - Error yang ditemui saat `docker build`/`docker run` dan cara memperbaikinya: 
 
-Pada tahap awal, Docker Desktop belum dapat menjalankan container karena Doctor Engine belum aktif dan masih membutuhkan WSL 2 sebagai backend untuk menjalankan Linux container. Perbaikan dilakukan dengan mengaktifkan WSL 2 dan memastikan berjalan dengan konfigurasi Linux container.
+Pada tahap awal, Docker Desktop belum dapat menjalankan container karena Doctor Engine belum aktif. Error awal yang muncul adalah:
+
+```bash
+Virtualization support not detected
+```
+
+Permasalah tersebut terjadi karena fitur virtualisasi pada laptop belum terdeteksi oleh Docker Desktop. Setelah dilakukan pengecekan, virtualisasi CPU masih perlu diaktifkan melalui BIOS.
+
+Perbaikan dilakukan dengan:
+1. Mengaktifkan fitur virtualisasi pada BIOS
+2. Menginstall dan mengaktifkan Windows Subsystem for Linux (WSL 2).
+3. Menga
 
 Setelah konfigurasi berhasil, proses build dan run berhasil dilakukan:
 

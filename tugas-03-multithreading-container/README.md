@@ -37,6 +37,49 @@ docker build -t foodgo-order-sim .
 docker run --rm foodgo-order-sim
 ```
 
+## Analisis Implementasi
+
+### 1. Analisis Permasalahan pada Studi Kasus
+
+Permasalahan utama pada server FoodGo adalah penggunaan proses OS baru untuk setiap request pesanan. Jika setiap pesanan diproses dengan membuat proses baru, misalnya menggunakan 'fork()', maka ketika banyak pesanan masuk secara bersamaan server harus membuat banyak proses terpisah.
+
+Pada kondisi 100 pesanan yang masuk secara bersamaan, pendekatan tersebut dapat menyebabkan penggunaan resource meningkat karena setiap proses memiliki ruang alamat memori, struktur proses, dan resource prosesnya sendiri. Semakin banyak proses yang dibuat, semakin besar pula overhead yang harus ditangani oleh sistem operasi.
+
+Permasalahan ini tidak hanya berkaitan dengan jumlah pekerjaan yang harus diproses, tetapi juga bagaimana cara pekerjaan tersebut dieksekusi. Jika setiap request selalu menghasilkan proses OS baru, maka server harus melakukan pembuatan, penjadwalan, pengelolaan, dan penghentian banyak proses.
+
+Oleh karena itu, pada tugas digunakan pendekatan multitreading untuk mensimulasikan cara pemrosesan banyak pesanan secara konkuren dengan overhead yang lebih ringan dibandingkan dengan membuat satu proses OS penuh untuk setiap request.
+
+### 2. Analisis Implementasi Multithreading
+
+Pada simulasi FoodGo terdapat 100 pesanan yang harus diproses dengan 10 worker thread.
+
+Konfigurasi program menggunakan:
+
+```python
+NUM_ORDERS = 100
+NUM_WORKERS = 10
+```
+
+Artinya, setiap 100 pesanan dibagi kepada 10 worker sehingga setiap worker memperoleh bagian pekerjaan untuk diproses. Konfigurasi 100 pesanan dan 10 worker tersebut memang telah ditentukan pada skeleton program. Setiap thread menjalankan fungsi `worker()` yang kemudian memanggil `process_order()` untuk setiap pesanan.
+
+Secara sederhana, struktur eksekusinya dapat digambarkan sebagai:
+
+```text
+1 Process Python
+│
+├── Thread Worker 1
+├── Thread Worker 2
+├── Thread Worker 3
+├── ...
+└── Thread Worker 10
+```
+
+Thread dibuat menggunakan `threading.Thread`, kemudian seluruh thread dijalankan menggunakan `start()`. Setelah seluruh worker dijalankan, program menggunakan `join()` untuk menunggu sampai semua thread selesai sebelum menampilkan nilai akhir `processed_count`. Skeleton meminta pembagian `order_ids`, pembuatan thread, menjalankan seluruh thread, dan kemudian melakukan `join()` sebelum hasil akhir ditampilkan.
+
+Dengan mekanisme tersebut, program tidak memproses seluruh pesanan satu per satu secara sekuensial. Beberapa worker dapat aktif dalam waktu yang sama dan melakukan pekerjaan secara konkuren.
+
+Penggunaan `time.sleep()` pada fungsi pemrosesan bukan penyebab utama program menjadi konkuren. Konkurensi terjadi karena worker benar-benar dijalankan sebagai beberapa thread dengan `threading.Thread()`. Pada skeleton, `time.sleep()` digunakan untuk mensimulasikan pekerjaan seperti validasi atau perhitungan pesanan.
+
 ## Struktur Submission
 
 ```
