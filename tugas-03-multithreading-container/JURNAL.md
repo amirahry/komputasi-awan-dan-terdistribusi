@@ -19,9 +19,9 @@ temp = processed_count
 time.sleep(0.01)
 processed_count = temp + 1
 ```
-Pada proses tersebut, thread membaca nilai processed_count menyimpannya sementara pada temp, lalu melakukan penambahan nilai. time.sleep(0.01)digunakan untuk memperbesar kemungkinan terjadinya konflik antar thread agar race condition lebih mudah diamati. 
+Pada proses tersebut, thread membaca nilai processed_count menyimpannya sementara pada temp, lalu melakukan penambahan nilai. time.sleep(0.01) digunakan untuk memperbesar kemungkinan terjadinya konflik antar thread agar race condition lebih mudah diamati. 
 
-Ketika beberapa threads mengakses processed_count secara bersamaan, beberapa thread dapat membaca nilai lama yang sama sehingga perubahan nilai dapat tertimpa. Akibatnya, sebagian proses increment tidak tercatat dan hasil akhir processed_count menjadi kurang dari jumlah pesanan sebenarnya serta dapat berbeda setiap kali program dijalankan.
+Ketika beberapa thread mengakses processed_count secara bersamaan, beberapa thread dapat membaca nilai lama yang sama sehingga perubahan nilai dapat tertimpa. Akibatnya, sebagian proses increment tidak tercatat dan hasil akhir processed_count menjadi kurang dari jumlah pesanan sebenarnya serta dapat berbeda setiap kali program dijalankan.
 
 ## Percobaan dengan Lock
 - Hasil `processed_count` setelah perbaikan: 
@@ -50,7 +50,7 @@ Pada tahap awal, Docker Desktop belum dapat menjalankan container karena Doctor 
 Virtualization support not detected
 ```
 
-Permasalah tersebut terjadi karena fitur virtualisasi pada laptop belum terdeteksi oleh Docker Desktop. Setelah dilakukan pengecekan, virtualisasi CPU masih perlu diaktifkan melalui BIOS.
+Permasalahan tersebut terjadi karena fitur virtualisasi pada laptop belum terdeteksi oleh Docker Desktop. Setelah dilakukan pengecekan, virtualisasi CPU masih perlu diaktifkan melalui BIOS.
 
 Perbaikan dilakukan dengan:
 1. Mengaktifkan fitur virtualisasi pada BIOS

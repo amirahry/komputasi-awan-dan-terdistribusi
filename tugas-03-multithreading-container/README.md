@@ -47,7 +47,7 @@ Pada kondisi 100 pesanan yang masuk secara bersamaan, pendekatan tersebut dapat 
 
 Permasalahan ini tidak hanya berkaitan dengan jumlah pekerjaan yang harus diproses, tetapi juga bagaimana cara pekerjaan tersebut dieksekusi. Jika setiap request selalu menghasilkan proses OS baru, maka server harus melakukan pembuatan, penjadwalan, pengelolaan, dan penghentian banyak proses.
 
-Oleh karena itu, pada tugas ini digunakan pendekatan multitreading untuk mensimulasikan cara pemrosesan banyak pesanan secara konkuren dengan overhead yang lebih ringan dibandingkan dengan membuat satu proses OS penuh untuk setiap request.
+Oleh karena itu, pada tugas ini digunakan pendekatan multithreading untuk mensimulasikan cara pemrosesan banyak pesanan secara konkuren dengan overhead yang lebih ringan dibandingkan dengan membuat satu proses OS penuh untuk setiap request.
 
 ### 2. Analisis Implementasi Multithreading
 
@@ -124,7 +124,7 @@ Variabel tersebut digunakan untuk menghitung jumlah pesanan yang telah selesai d
 
 Pada percobaan tanpa `Lock`, digunakan mekanisme seperti:
 
-```pyhton
+```python
 temp = processed_count
 time.sleep(0.01)
 processed_count = temp + 1
@@ -153,7 +153,7 @@ Thread A menyimpan 11
 Thread B juga menyimpan 11
 ```
 
-Secara logika, dua operasi increment seharusnya menghasilkan nilai 12. Namun karena kedua thread menggunakan nilai awal yang sama, salah satu hasil increment menjadi hilang dan nilai akhirnya hanya 11. Kondisi itu disebut sebagai **race coondition**, yaitu kondisi ketika hasil program dipengaruhi oleh urutan atau waktu eksekusi beberapa thread yang mengakses shared data secara bersamaan.
+Secara logika, dua operasi increment seharusnya menghasilkan nilai 12. Namun karena kedua thread menggunakan nilai awal yang sama, salah satu hasil increment menjadi hilang dan nilai akhirnya hanya 11. Kondisi itu disebut sebagai **race condition**, yaitu kondisi ketika hasil program dipengaruhi oleh urutan atau waktu eksekusi beberapa thread yang mengakses shared data secara bersamaan.
 
 Pengguanan:
 
@@ -168,7 +168,7 @@ pada percobaan tanpa lock, variabel diatas digunakan untuk memperbesar jendela w
 Race condition diperbaiki menggunakan objek:
 
 ```pyhton
-lock = threading.lock()
+lock = threading.Lock()
 ```
 
 Kemudian bagian yang melakukan perubahan terhadap `processed_count` dilindungi menggunakan:
@@ -229,7 +229,7 @@ Setelah program multithreading berhasil dijalankan secara langsung pada laptop, 
 
 Dockerfile digunakan untuk menentukan environment tempat program dijalankan, seperti base image Python, working directory, file program yang disalin, dan command yang dijalankan ketika container dimulai.
 
-Program ini hanya menggunakan Python standard library, yaitu `threading`, `random`, dan `time`, sehingga tidak membutuhkan depedency eksternal tambahan. FIle `requirements.txt` tetap disertakan dalam struktur prokect, tetapi tidak berisi package yang perlu di-install.
+Program ini hanya menggunakan Python standard library, yaitu `threading`, `random`, dan `time`, sehingga tidak membutuhkan depedency eksternal tambahan. FIle `requirements.txt` tetap disertakan dalam struktur project, tetapi tidak berisi package yang perlu di-install.
 
 Dockerfile kemudian menyalin source code program ke dalam container dan menjalankan `src/order_simulator.py` menggunakan Python ketika container dimulai.
 
@@ -275,7 +275,7 @@ Total pesanan diproses: 100 (seharusnya 100)
 
 Namun urutan pesanan yang selesai masih dapat berbeda. Oleh karena itu, Docker tidak digunakan untuk memperbaiki race condition. Race condition diperbaiki pada level aplikasi menggunakan mekanisme sinkronisasi seperti `threading_Lock()`.
 
-### 9. Kesimpulan Analsis
+### 9. Kesimpulan Analisis
 
 Berdasarkan implementasi dan hasil pengujian, permasalahan utama pada studi kasus FoodGo berasal dari penggunaan proses OS baru untuk setiap request. Pendekatan tersebut dapat menghasilkan overhead besar ketika banyak pesanan masuk secara bersamaan karena server harus membuat dan mengelola banyak proses.
 
@@ -284,7 +284,6 @@ Pada tugas ini, solusi yang digunakan adalah membagi 100 pesanan kepada 10 worke
 ```text
 36 dari 100
 ```
-
 Hasil tersebut terjadi karena beberapa thread dapat membaca dan memperbarui nilai counter secara bersamaan sehingga sebagian increment hilang.
 
 Setelah critical section dilindungi menggunakan:
@@ -300,11 +299,11 @@ Nilai akhirnya menjadi:
 100 dari 100
 ```
 
-Hal tersebut membuktikan bahwa `threading.Lock()` dapat digunakan untuk menyinkronkan akses terhadap shared data dan mencegah race condition pada counter. Setelah implementasi multithreading dan sinkronasi berhasil, program dikemas menggunakan Docker container. Program final tetap menghasilkan nilai `processed_count` sebesar 100 ketika dijalankan di dalam container. Dari hasil tersebut dapat disimpulkan bahwa ketiga konsep pada tugas memiliki fungsi yang saling melengkapi.
+Hal tersebut membuktikan bahwa `threading.Lock()` dapat digunakan untuk menyinkronkan akses terhadap shared data dan mencegah race condition pada counter. Setelah implementasi multithreading dan sinkronisasi berhasil, program dikemas menggunakan Docker container. Program final tetap menghasilkan nilai `processed_count` sebesar 100 ketika dijalankan di dalam container. Dari hasil tersebut dapat disimpulkan bahwa ketiga konsep pada tugas memiliki fungsi yang saling melengkapi.
 
 Secara teknis, multithreading berperan penting dalam meminimalkan kebutuhan pembuatan banyak proses pada OS sekaligus memungkinkan pekerjaan berjalan secara konkuren. Efisiensi ini kemudian didukung oleh mekanisme Lock yang menjaga konsistensi data saat digunakan bersama oleh thread. Terakhir, Docker menyempurnakan ekosistem tersebut dengan menyediakan environment eksekusi yang konsisten serta mempermudah aplikasi untuk dideploy atau dijalankan di berbagai sistem lain tanpa kendala dependensi.
 
-Dengan demikian, implementasi yang dilakukan tidak hanya berhasil memproses seluruh pesanan, tetapi juga menunjukkan hubungan antar efisiensi penggunaan resource, masalah sinkronisasi pada multithreading, dan penggunaan container sebagai environment untuk menjalankan aplikasi.
+Dengan demikian, implementasi yang dilakukan tidak hanya berhasil memproses seluruh pesanan, tetapi juga menunjukkan hubungan antara efisiensi penggunaan resource, masalah sinkronisasi pada multithreading, dan penggunaan container sebagai environment untuk menjalankan aplikasi.
 
 ## Struktur Submission
 
