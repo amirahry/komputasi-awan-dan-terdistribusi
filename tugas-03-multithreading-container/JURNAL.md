@@ -55,14 +55,21 @@ Permasalah tersebut terjadi karena fitur virtualisasi pada laptop belum terdetek
 Perbaikan dilakukan dengan:
 1. Mengaktifkan fitur virtualisasi pada BIOS
 2. Menginstall dan mengaktifkan Windows Subsystem for Linux (WSL 2).
-3. Menga
+3. Mengatur Docker Desktop agar menggunakan WSL 2 sebagai backend untuk menjalankan Linux container.
 
-Setelah konfigurasi berhasil, proses build dan run berhasil dilakukan:
+Setelah konfigurasi berhasil, Docker Desktop dapat menjalankan Docker Engine.
+
+Pada proses berikutnya, dilakukan pengujian build image menggunakan:
 
 ```bash
 docker build -t foodgo-order-sim .
+```
+
+dan menjalankan container dengan:
+```bash
 docker run --rm foodgo-order-sim
 ```
+
 Hasil pengujian:
 
 ```text
@@ -76,5 +83,5 @@ Program berhasil berjalan di dalam Docker container dengan lingkungan Linux dan 
 
 | Tanggal | Tool AI | Prompt yang diberikan | Ringkasan saran/ide AI | Bagaimana diolah jadi tulisan/kode sendiri |
 |---|---|---|---|---|
-| 30 September 2026 | ChatGPT | Membantu memahami tugas, multithreading, race condition, dan Lock. | Menjelaskan konsep dan alur pengerjaan tugas. | Digunakan sebagai referensi pemahaman sebelum implementasi. |
+| 30 September 2026 | ChatGPT | Membantu memahami tugas, multithreading, race condition, dan Lock. | Menjelaskan konsep dan alur pengerjaan tugas. | Digunakan sebagai referensi pemahaman konsep sebelum implementasi kode dan pengujian mandiri. |
 | 30 September 2026 | ChatGPT | Membantu proses instalasi Docker Desktop, konfigurasi WSL 2 Linux, dan mengatasi kendala saat menjalankan Docker. | Memberikan panduan instalasi Docker, mengaktifkan WSL 2, menjalankan Ubuntu Linux, mengecek konfigurasi Docker Engine, serta troubleshooting saat Docker belum dapat digunakan. | Langkah-langkah tersebut diterapkan langsung pada perangkat hingga lingkungan Linux melalui WSL 2 dan Docker berhasil berjalan untuk menjalankan container project. |
