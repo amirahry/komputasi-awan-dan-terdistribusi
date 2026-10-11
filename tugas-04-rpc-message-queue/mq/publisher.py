@@ -20,6 +20,10 @@ def main():
 
     # TODO 2: deklarasikan queue dengan nama QUEUE_NAME (channel.queue_declare),
     # gunakan durable=True supaya pesan tidak hilang walau RabbitMQ restart.
+    channel.queue_declare(
+        queue=QUEUE_NAME,
+        durable=True 
+    )
 
     for i in range(1, 4):
         pesan = {
@@ -29,18 +33,16 @@ def main():
         }
         # TODO 3: publish `pesan` (di-encode json) ke QUEUE_NAME memakai
         # channel.basic_publish(...). Cetak log "Event terkirim: ..." setiap publish.
-    channel.basic_publish(
-        exchange="",
-        routing_key=QUEUE_NAME,
-        body=json.dumps(pesan),
-        properties=pika.BasicProperties(
-            delivery_mode=2
+        channel.basic_publish(
+            exchange="",
+            routing_key=QUEUE_NAME,
+            body=json.dumps(pesan),
+            properties=pika.BasicProperties(
+                delivery_mode=2
+            )
         )
-    )
-
-    print(f"Event terkirim: {pesan}")
-    # print(f"[TODO] Event belum benar-benar terkirim: {pesan}")
-    time.sleep(1)
+        print(f"Event terkirim: {pesan}")
+        time.sleep(1)
 
     # TODO 4: tutup koneksi (connection.close()) setelah selesai.
     connection.close()

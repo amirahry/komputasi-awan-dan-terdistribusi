@@ -24,36 +24,28 @@ def proses_pembayaran(user_id: str, jumlah: float) -> dict:
     """Kurangi saldo user sejumlah `jumlah`. Kembalikan status hasil."""
     # TODO 2: validasi saldo cukup, kurangi saldo_user[user_id], dan kembalikan
     # dict berisi minimal {"status": "sukses"/"gagal", "saldo_akhir": ...}
-    saldo = saldo_user.get(user_id, 0)
-    
-    if jumlah <= 0:
-        return {
-            "status": "gagal",
-            "saldo_akhir": saldo,
-            "pesan": "Jumlah pembayaran harus lebih dari 0."
-        }
-        
     if user_id not in saldo_user:
         return {
             "status": "gagal",
-            "saldo_akhir": 0,
-            "pesan": f"User {user_id} tidak ditemukan."
+            "saldo_akhir": 0
         }
-        
-    if saldo < jumlah:
+    if jumlah <= 0:
         return {
             "status": "gagal",
-            "saldo_akhir": saldo,
-            "pesan": "Saldo tidak cukup."
+            "saldo_akhir": saldo_user[user_id]
         }
-        
+    if saldo_user[user_id] < jumlah:
+        return {
+            "status": "gagal",
+            "saldo_akhir": saldo_user[user_id]
+        }
+
     saldo_user[user_id] -= jumlah
+
     return {
         "status": "sukses",
-        "saldo_akhir": saldo_user[user_id],
-        "pesan": f"Pembayaran sebesar {jumlah} berhasil."
+        "saldo_akhir": saldo_user[user_id]
     }
-
 
 def main():
     # TODO 3: buat SimpleXMLRPCServer di localhost port 8000,
@@ -63,9 +55,7 @@ def main():
     server.register_function(proses_pembayaran, "proses_pembayaran")
     
     print("RPC server modul Pembayaran berjalan di port 8000...")
-    print("Fungsi tersedia: cek_saldo(user_id), proses_pembayaran(user_id, jumlah)")
     server.serve_forever()
-
 
 if __name__ == "__main__":
     main()

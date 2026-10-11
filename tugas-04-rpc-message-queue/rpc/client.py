@@ -9,7 +9,7 @@ import time
 
 def main():
     # TODO 1: buat ServerProxy ke http://localhost:8000
-    proxy = xmlrpc.client.ServerProxy("http://localhost:8000", allow_none=True)  # ganti dengan xmlrpc.client.ServerProxy(...)
+    proxy = xmlrpc.client.ServerProxy("http://localhost:8000")  # ganti dengan xmlrpc.client.ServerProxy(...)
 
     print("Memanggil cek_saldo('user1') ... menunggu respons sinkron")
     start = time.time()
@@ -18,20 +18,15 @@ def main():
     
     saldo = proxy.cek_saldo("user1")
     elapsed = time.time() - start
+    
     print(f"Saldo user1: {saldo}")
-    print(f"Waktu tunggu RPC: {elapsed:.6f} detik")
+    print(f"Waktu tunggu: {elapsed:.6f} detik")
 
     print("Memanggil proses_pembayaran('user1', 20000) ...")
     # TODO 3: panggil proxy.proses_pembayaran("user1", 20000) dan cetak hasilnya
     
-    start = time.time()
     hasil = proxy.proses_pembayaran("user1", 20000)
-    elapsed = time.time() - start
     print(f"Hasil pembayaran: {hasil}")
-    print(f"Waktu tunggu RPC: {elapsed:.6f} detik")
-    
-    print("\nClient baru bisa melanjutkan setelah respons server diterima (sinkron/blocking).")
-
 
 if __name__ == "__main__":
     main()

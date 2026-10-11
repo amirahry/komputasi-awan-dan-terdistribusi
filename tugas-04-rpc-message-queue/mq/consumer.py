@@ -19,8 +19,6 @@ def callback(ch, method, properties, body):
         f"{pesan['user_id']} sejumlah {pesan['jumlah']}"
     )
 
-    print(f"[TODO] Pesan diterima tapi belum diproses: {pesan}")
-
     # TODO 2: kirim acknowledgement ke RabbitMQ (ch.basic_ack) supaya
     # pesan dihapus dari antrean setelah berhasil diproses.
     
