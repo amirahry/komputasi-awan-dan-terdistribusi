@@ -1,5 +1,6 @@
 # Jurnal Proses — Tugas 5
 
+
 ## Implementasi Bully
 - Kendala saat mengisi TODO 1-4:
   - Pada TODO 1, kendala yang ditemukan adalah mengatur penerimaan pesan antar node seperti **ELECTION**, **OK**, dan **COORDINATOR** agar setiap node dapat merespons sesuai aturan Bully Algorithm.

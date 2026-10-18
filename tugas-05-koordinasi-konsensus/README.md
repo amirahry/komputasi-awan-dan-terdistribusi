@@ -5,7 +5,9 @@
 
 # 1. Deskripsi Sistem dan Implementasi
 
-Pada sistem terdistribusi, beberapa komputer atau server dapat bekerja secara bersamaan untuk menjalankan suatu layanan. Namun, ketika beberapa node melakukan proses secara bersamaan, dapat terjadi konflik keputusan apabila tidak terdapat pihak yang mengatur koordinasi. Pada studi kasus FoodGo, beberapa server dapat menerima dan mencatat pesanan dengan urutan berbeda akibat perbedaan waktu dan proses. Oleh karena itu, diperlukan sebuah **Node Leader** yang bertugas sebagai koordinator agar proses antrean pesanan tetap konsisten dan tidak terjadi pemrosesan ganda.Pada tugas ini dilakukan implementasi **Bully Algorithm** untuk melakukan pemilihan leader pada 5 node virtual yang berjalan sebagai proses Python terpisah.
+Pada sistem terdistribusi, beberapa komputer atau server dapat bekerja secara bersamaan untuk menjalankan suatu layanan. Namun, ketika beberapa node melakukan proses secara bersamaan, dapat terjadi konflik keputusan apabila tidak terdapat pihak yang mengatur koordinasi. Pada studi kasus FoodGo, beberapa server dapat menerima dan mencatat pesanan dengan urutan berbeda akibat perbedaan waktu dan proses. Oleh karena itu, diperlukan sebuah **Node Leader** yang bertugas sebagai koordinator agar proses antrean pesanan tetap konsisten dan tidak terjadi pemrosesan ganda.
+
+Pada tugas ini dilakukan implementasi **Bully Algorithm** untuk melakukan pemilihan leader pada 5 node virtual yang berjalan sebagai proses Python terpisah.
 
 Komunikasi antar node menggunakan:
 - TCP Socket
@@ -25,6 +27,33 @@ Pesan yang digunakan dalam komunikasi antar node:
 - **COORDINATOR** : Digunakan untuk mengumumkan leader baru kepada seluruh node.
 - **PING** : Digunakan untuk mengecek apakah leader masih aktif.
 
+## Cara menjalankan program
+Buka lima terminal terpisah di VS Code dari folder utama proyek. Jalankan satu perintah pada setiap terminal. Pada Windows PowerShell, gunakan python jika perintah tersebut tersedia di lingkungan Python yang digunakan.
+
+Terminal 1:
+python -u src/node.py --id 1 --port 5001 --peers 5002,5003,5004,5005
+
+Terminal 2:
+python -u src/node.py --id 2 --port 5002 --peers 5001,5003,5004,5005
+
+Terminal 3:
+python -u src/node.py --id 3 --port 5003 --peers 5001,5002,5004,5005
+
+Terminal 4:
+python -u src/node.py --id 4 --port 5004 --peers 5001,5002,5003,5005
+
+Terminal 5:
+python -u src/node.py --id 5 --port 5005 --peers 5001,5002,5003,5004
+
+Jika perintah python tidak dikenali di Windows, coba py sebagai penggantinya. Pastikan semua node dijalankan dari folder utama proyek agar jalur src/node.py sesuai.
+
+## Hubungan dengan Physical Clock dan Logical Clock
+
+Physical clock mengacu pada waktu nyata yang ditunjukkan oleh jam perangkat. Jam pada server berbeda dapat tidak sinkron, sehingga timestamp dari setiap server belum tentu cukup untuk menentukan urutan kejadian secara konsisten.
+
+Logical clock, seperti Lamport clock, membantu mengurutkan kejadian berdasarkan hubungan sebab-akibat antar-kejadian, bukan berdasarkan waktu kalender secara langsung.
+
+Implementasi pada tugas ini berfokus pada pemilihan leader menggunakan Bully Algorithm. Program ini tidak mengimplementasikan sinkronisasi physical clock maupun logical clock. Leader dapat menjadi koordinator antrean, tetapi pemilihan leader saja tidak otomatis menjamin urutan pesanan atau mencegah pemrosesan ganda. Sistem FoodGo tetap memerlukan mekanisme tambahan, misalnya ID pesanan unik, pemeriksaan duplikasi, dan aturan penetapan urutan pesanan.
 ---
 
 # 2. Implementasi Bully Algorithm
@@ -67,12 +96,13 @@ Dengan mekanisme tersebut, Bully Algorithm mampu menentukan leader secara otomat
 # 4. Mengapa Sistem Membutuhkan Leader?
 
 Leader diperlukan dalam sistem terdistribusi untuk menjaga koordinasi antar node. Tanpa adanya leader, setiap node dapat mengambil keputusan sendiri sehingga dapat menyebabkan:
+
 - Konflik pemrosesan data.
 - Perbedaan urutan transaksi.
 - Pemrosesan data secara ganda.
 - Ketidakkonsistenan informasi.
 
-Pada kasus FoodGo, leader berfungsi sebagai pusat koordinasi antrean pesanan sehingga seluruh server memiliki acuan yang sama dalam memproses pesanan.
+Pada kasus FoodGo, leader berfungsi sebagai pusat koordinasi antrean pesanan sehingga seluruh server memiliki acuan yang sama dalam memproses pesanan. Namun, pemilihan leader saja belum menjamin konsistensi seluruh data pesanan, masih diperlukan aturan pemrosesan pesanan dan pencegahan duplikasi.
 
 ---
 
@@ -97,8 +127,8 @@ Dampaknya:
 
 ---
 
-## Tidak Ada Leader Sementara Saat Terjadi Kegagalan
-Ketika leader mengalami kegagalan, sistem tidak langsung memiliki pemimpin baru. Node lain harus melakukan proses election terlebih dahulu.
+## Ada waktu tunggu saat leader gagal
+Ketika leader mengalami kegagalan, sistem tidak langsung memiliki pemimpin baru. Node lain harus mendeteksi kegagalan dan menjalankan proses election terlebih dahulu.
 
 Selama proses tersebut:
 - Tidak ada node yang bertindak sebagai koordinator.
@@ -117,10 +147,14 @@ Node 4 menjadi leader baru.
 
 ## Kurang Efisien untuk Sistem Besar
 Bully Algorithm lebih cocok digunakan pada sistem kecil. Pada sistem dengan banyak node, algoritma ini kurang efisien karena:
+
 - Jumlah pesan semakin besar.
 - Election dapat terjadi berulang kali.
 - Penggunaan jaringan meningkat.
 
+## Perlu deteksi kegagalan yang tepat
+
+Kegagalan koneksi tidak selalu berarti proses node benar-benar mati. Jaringan yang bermasalah atau proses yang lambat juga dapat menyebabkan timeout. Implementasi ini menggunakan kegagalan koneksi TCP saat mengirim PING sebagai indikasi bahwa leader tidak dapat dijangkau.
 ---
 
 # 6. Perbandingan Bully Algorithm dengan Raft
@@ -128,14 +162,12 @@ Bully Algorithm lebih cocok digunakan pada sistem kecil. Pada sistem dengan bany
 Bully Algorithm dan Raft sama-sama digunakan untuk melakukan pemilihan leader pada sistem terdistribusi, tetapi memiliki mekanisme yang berbeda. Bully Algorithm menentukan leader berdasarkan ID node. Node dengan ID terbesar yang masih aktif akan menjadi leader. Sedangkan Raft menggunakan mekanisme voting mayoritas. Sebuah node menjadi kandidat leader dan meminta persetujuan dari node lain.
 
 Perbedaan utama:
-- Bully Algorithm memilih leader berdasarkan ID tertinggi.
-- Raft memilih leader berdasarkan voting mayoritas.
-- Bully Algorithm dapat menghasilkan lebih banyak pesan saat election.
-- Raft memiliki mekanisme konsensus yang lebih stabil.
-- Bully Algorithm lebih sederhana untuk sistem kecil.
-- Raft lebih cocok untuk sistem besar yang membutuhkan konsistensi tinggi.
+- Bully Algorithm memilih node dengan ID tertinggi di antara node yang masih aktif dan dapat dijangkau. Sementara itu, Raft memilih leader melalui proses pemungutan suara yang membutuhkan persetujuan mayoritas node.
+- Bully Algorithm relatif sederhana untuk dipahami dan diterapkan pada simulasi kecil, tetapi proses election dapat menghasilkan banyak pesan. Raft memiliki mekanisme yang lebih kompleks karena mencakup pemilihan leader dan pengelolaan konsensus.
+- Bully Algorithm pada tugas ini berfokus pada pemilihan leader dan tidak menyediakan mekanisme replikasi log. Raft mencakup replikasi log dan mekanisme komitmen entri berdasarkan mayoritas untuk menjaga konsistensi data antar-node.
+- Bully Algorithm sesuai untuk mempelajari konsep pemilihan leader pada sistem sederhana. Raft lebih sesuai untuk sistem yang membutuhkan konsensus dan konsistensi data yang direplikasi, meskipun implementasinya lebih kompleks.
 
-Pada tugas ini digunakan Bully Algorithm karena jumlah node hanya lima sehingga proses election dapat diamati dengan mudah.
+Pada tugas ini digunakan Bully Algorithm karena jumlah node hanya lima sehingga proses election dapat diamati dengan mudah. Tetapi, dari perbandingan ini tidak berarti Raft selalu lebih baik untuk semua kebutuhan, pilihan algoritma bergantung oada kebutuhan sistem dan modek kegagalannya.
 
 ---
 
@@ -197,4 +229,6 @@ Dokumentasi bukti:
 
 # 8. Kesimpulan
 
-Implementasi Bully Algorithm berhasil melakukan pemilihan leader pada sistem terdistribusi dengan lima node virtual. Pada kondisi normal, Node 5 terpilih sebagai leader karena memiliki ID tertinggi. Ketika Node 5 mengalami kegagalan, sistem mampu melakukan election ulang dan memilih Node 4 sebagai leader baru karena memiliki ID tertinggi dari node yang masih aktif. Bully Algorithm mampu menjaga konsistensi pemilihan leader antar node, tetapi memiliki kelemahan berupa jumlah pesan election yang meningkat pada sistem besar serta adanya waktu sementara tanpa leader ketika terjadi kegagalan.
+Implementasi Bully Algorithm berhasil melakukan pemilihan leader pada sistem terdistribusi dengan lima node virtual. Pada kondisi normal, Node 5 terpilih sebagai leader karena memiliki ID tertinggi. Ketika Node 5 mengalami kegagalan, sistem mampu melakukan election ulang dan memilih Node 4 sebagai leader baru karena memiliki ID tertinggi dari node yang masih aktif. 
+
+Simulasi ini memperlihatkan bahwa Bully Algorithm mampu menjaga konsistensi pemilihan leader antar node, tetapi memiliki kelemahan berupa jumlah pesan election yang meningkat pada sistem besar serta adanya waktu sementara tanpa leader ketika terjadi kegagalan.
