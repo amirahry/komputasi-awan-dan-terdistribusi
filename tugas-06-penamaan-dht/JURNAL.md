@@ -72,5 +72,9 @@ Pengujian menunjukkan bahwa mekanisme `find_successor`, `join`, dan `leave` dala
 > Wajib diisi sesuai kebijakan Level 2 di [`../RUBRIK-UMUM.md`](../RUBRIK-UMUM.md). Tulis "Tidak memakai AI" pada baris pertama jika memang tidak dipakai. Hanya untuk brainstorming ide/outline — bukan untuk kode/analisis/teks akhir.
 
 | Tanggal | Tool AI | Prompt yang diberikan | Ringkasan saran/ide AI | Bagaimana diolah jadi tulisan/kode sendiri |
-| 30/10/26 | ChatGPT | Apa saja aspek yang perlu dipertimbangkan dalam membandingkan Chord DHT dengan flat naming dan DNS untuk kasus FoodGo? | Memberikan ide aspek perbandingan berupa distribusi data, pembaruan IP, efisiensi pencarian, dan skalabilitas | Aspek tersebut dijadikan acuan untuk menyusun pembahasan pada README berdasarkan pemahaman materi |
-| ... | ... | ... | ... | ... |
+|---|---|---|---|---|
+| 30/10/26 | ChatGPT | Apa saja aspek yang perlu dipertimbangkan dalam membandingkan Chord DHT dengan flat naming dan DNS untuk kasus FoodGo? | Memberikan ide perbandingan mengenai distribusi data, pembaruan IP, efisiensi pencarian, dan skalabilitas. | Ide digunakan sebagai acuan dalam menyusun pembahasan README berdasarkan pemahaman materi. |
+| 30/10/26 | ChatGPT | Bagaimana konsep dasar consistent hashing pada Chord DHT? | Menjelaskan gambaran umum pembagian key berdasarkan nilai hash dan node penanggung jawab. | Penjelasan digunakan sebagai bahan pemahaman konsep distribusi key pada ring Chord. |
+| 30/10/26 | ChatGPT | Apa yang perlu diperhatikan ketika node bergabung atau keluar dari ring Chord? | Memberikan gambaran mengenai perubahan kepemilikan key saat terjadi perubahan jumlah node. | Informasi dijadikan referensi untuk memahami skenario join dan leave sebelum melakukan pengujian. |
+| 30/10/26 | ChatGPT | Bagaimana urutan yang tepat untuk menjelaskan ring topology? | Menyarankan urutan pembahasan mulai dari nilai hash, posisi node, hingga distribusi key. | Saran digunakan untuk membantu menyusun struktur penjelasan diagram ring pada README. |
+| 30/10/26 | ChatGPT | Apa saja hal penting yang perlu dicatat dalam jurnal proses simulasi Chord DHT? | Menyarankan pencatatan kendala, proses penyelesaian, skenario pengujian, dan hasil pengamatan. | Saran digunakan sebagai panduan penyusunan jurnal sesuai proses pengerjaan yang dilakukan. |
