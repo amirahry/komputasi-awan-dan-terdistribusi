@@ -5,11 +5,11 @@ Mensimulasikan delay replikasi dan masalah inconsistent read,
 lalu memperbaikinya dengan mekanisme Read-Your-Writes sederhana.
 """
 
+from platform import system
 import time
 import threading
 
 REPLICATION_DELAY = 2.0  # detik, simulasi lambatnya sinkronisasi antar server
-
 
 class Replica:
     def __init__(self, name: str):
@@ -24,8 +24,7 @@ class Replica:
 
     def read(self, user_id: str) -> float:
         return self.saldo.get(user_id, 0.0)
-
-
+    
 class ReplicationSystem:
     def __init__(self):
         self.jakarta = Replica("Jakarta")
@@ -39,24 +38,52 @@ class ReplicationSystem:
         saldo_baru = self.jakarta.read(user_id) + jumlah
         self.jakarta.write(user_id, saldo_baru, version)
 
-        # TODO 1: replikasi ke Bandung TERTUNDA (simulasikan dengan
-        # threading.Timer(REPLICATION_DELAY, ...) yang memanggil
-        # self.bandung.write(user_id, saldo_baru, version) setelah delay.
-        print(f"[TODO] Replikasi ke Bandung akan tertunda {REPLICATION_DELAY} detik")
+        # TODO 1: Replikasi ke Bandung dengan delay buatan
+        timer = threading.Timer(
+            REPLICATION_DELAY,
+            self.bandung.write,
+            args=(user_id, saldo_baru, version)
+        )
+        timer.start()
 
+        print(
+            f"[Replikasi] Pembaruan ke Bandung "
+            f"tertunda {REPLICATION_DELAY} detik"
+        )
+       
     def baca_saldo_naif(self, user_id: str, server: str) -> float:
         """Baca saldo TANPA mekanisme Read-Your-Writes - bisa saja stale."""
         replica = self.jakarta if server == "Jakarta" else self.bandung
         return replica.read(user_id)
 
     def baca_saldo_read_your_writes(self, user_id: str, server: str, versi_minimal: int) -> float:
-        """TODO 2: implementasikan Read-Your-Writes -
-        jika replika yang dituju versi datanya < versi_minimal (client pernah
-        melihat versi lebih baru sebelumnya), tunggu/redirect ke replika yang
-        sudah punya versi tersebut (di sini cukup simulasikan dengan polling
-        sampai versi replika >= versi_minimal, atau redirect ke Jakarta)."""
-        pass
+        
+        # TODO 2: Periksa versi dan alihkan pembacaan jika diperlukan
+        replica = self.jakarta if server == "Jakarta" else self.bandung
+        versi_replica = replica.last_write_version.get(user_id, 0)
 
+        if versi_replica >= versi_minimal:
+            print(
+                f"[RYW] {replica.name} memiliki versi "
+                f"{versi_replica}, data dapat dibaca"
+            )
+            return replica.read(user_id)
+
+        print(
+            f"[RYW] {replica.name} masih versi {versi_replica}, "
+            f"membutuhkan versi {versi_minimal}"
+        )
+
+        # Mengalihkan pembacaan ke Jakarta jika Bandung belum sinkron
+        versi_jakarta = self.jakarta.last_write_version.get(user_id, 0)
+
+        if versi_jakarta >= versi_minimal:
+            print(f"[RYW] Redirect ke Jakarta (versi {versi_jakarta})")
+            return self.jakarta.read(user_id)
+
+        raise RuntimeError(
+            "Tidak ada replika yang memenuhi versi minimal pelanggan"
+        )
 
 def main():
     system = ReplicationSystem()
@@ -73,9 +100,17 @@ def main():
     print("\n=== Skenario dengan Read-Your-Writes ===")
     system.top_up(user_id, 20000)
     versi_terakhir = system.version_counter
-    # TODO 3: panggil baca_saldo_read_your_writes dan tunjukkan hasilnya SELALU benar
-    # walau dipanggil segera setelah top_up (< REPLICATION_DELAY detik).
 
+    # TODO 3: Tunjukkan hasil pembacaan dengan Read-Your-Writes
+    saldo_ryw = system.baca_saldo_read_your_writes(
+        user_id, "Bandung", versi_terakhir
+    )
+
+    print(f"Baca saldo dengan Read-Your-Writes: Rp{saldo_ryw:,.0f}")
+    print("-> Seharusnya Rp70,000; hasil benar meskipun Bandung belum tersinkronisasi")
+
+    time.sleep(REPLICATION_DELAY + 0.5)
+    print(f"Saldo akhir Bandung setelah replikasi: Rp{system.bandung.read(user_id):,.0f}")
 
 if __name__ == "__main__":
     main()
