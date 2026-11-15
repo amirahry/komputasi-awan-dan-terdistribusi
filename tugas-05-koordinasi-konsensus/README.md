@@ -30,30 +30,43 @@ Pesan yang digunakan dalam komunikasi antar node:
 ## Cara menjalankan program
 Buka lima terminal terpisah di VS Code dari folder utama proyek. Jalankan satu perintah pada setiap terminal. Pada Windows PowerShell, gunakan python jika perintah tersebut tersedia di lingkungan Python yang digunakan.
 
-Terminal 1:
+**Terminal 1 — Node 1**
+```powershell
 python -u src/node.py --id 1 --port 5001 --peers 5002,5003,5004,5005
+```
 
-Terminal 2:
+**Terminal 2 — Node 2**
+```powershell
 python -u src/node.py --id 2 --port 5002 --peers 5001,5003,5004,5005
+```
 
-Terminal 3:
+**Terminal 3 — Node 3**
+```powershell
 python -u src/node.py --id 3 --port 5003 --peers 5001,5002,5004,5005
+```
 
-Terminal 4:
+**Terminal 4 — Node 4**
+```powershell
 python -u src/node.py --id 4 --port 5004 --peers 5001,5002,5003,5005
+```
 
-Terminal 5:
+**Terminal 5 — Node 5**
+```powershell
 python -u src/node.py --id 5 --port 5005 --peers 5001,5002,5003,5004
+```
 
 Jika perintah python tidak dikenali di Windows, coba py sebagai penggantinya. Pastikan semua node dijalankan dari folder utama proyek agar jalur src/node.py sesuai.
 
 ## Hubungan dengan Physical Clock dan Logical Clock
 
-Physical clock mengacu pada waktu nyata yang ditunjukkan oleh jam perangkat. Jam pada server berbeda dapat tidak sinkron, sehingga timestamp dari setiap server belum tentu cukup untuk menentukan urutan kejadian secara konsisten.
+**Physical clock** mengacu pada waktu nyata yang ditunjukkan oleh jam perangkat. Jam pada server berbeda dapat tidak sinkron, sehingga timestamp dari setiap server belum tentu cukup untuk menentukan urutan kejadian secara konsisten.
 
-Logical clock, seperti Lamport clock, membantu mengurutkan kejadian berdasarkan hubungan sebab-akibat antar-kejadian, bukan berdasarkan waktu kalender secara langsung.
+**Logical clock**, seperti Lamport clock, membantu mengurutkan kejadian berdasarkan hubungan sebab-akibat antar-kejadian, bukan berdasarkan waktu kalender secara langsung.
 
-Implementasi pada tugas ini berfokus pada pemilihan leader menggunakan Bully Algorithm. Program ini tidak mengimplementasikan sinkronisasi physical clock maupun logical clock. Leader dapat menjadi koordinator antrean, tetapi pemilihan leader saja tidak otomatis menjamin urutan pesanan atau mencegah pemrosesan ganda. Sistem FoodGo tetap memerlukan mekanisme tambahan, misalnya ID pesanan unik, pemeriksaan duplikasi, dan aturan penetapan urutan pesanan.
+Implementasi pada tugas ini berfokus pada **pemilihan leader menggunakan Bully Algorithm**. Program ini tidak mengimplementasikan sinkronisasi physical clock maupun logical clock.
+
+Leader dapat menjadi koordinator antrean pesanan, tetapi pemilihan leader saja tidak otomatis menjamin urutan pesanan atau mencegah pemrosesan ganda. Sistem FoodGo tetap memerlukan mekanisme tambahan, seperti ID pesanan unik, pemeriksaan duplikasi, dan aturan penetapan urutan pesanan.
+
 ---
 
 # 2. Implementasi Bully Algorithm
@@ -154,7 +167,8 @@ Bully Algorithm lebih cocok digunakan pada sistem kecil. Pada sistem dengan bany
 
 ## Perlu deteksi kegagalan yang tepat
 
-Kegagalan koneksi tidak selalu berarti proses node benar-benar mati. Jaringan yang bermasalah atau proses yang lambat juga dapat menyebabkan timeout. Implementasi ini menggunakan kegagalan koneksi TCP saat mengirim PING sebagai indikasi bahwa leader tidak dapat dijangkau.
+Kegagalan koneksi tidak selalu berarti proses node benar-benar mati. Jaringan yang bermasalah atau proses yang lambat juga dapat menyebabkan timeout. Implementasi ini menggunakan kegagalan koneksi TCP saat mengirim pesan `PING` sebagai indikasi bahwa leader tidak dapat dijangkau.
+
 ---
 
 # 6. Perbandingan Bully Algorithm dengan Raft

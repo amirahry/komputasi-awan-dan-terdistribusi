@@ -8,9 +8,13 @@
 
   Eventual Consistency memungkinkan perbedaan saldo sementara antarreplika hingga proses sinkronisasi selesai. Model ini kurang sesuai jika diterapkan tanpa mekanisme tambahan pada sistem e-wallet karena pelanggan dapat mengalami penolakan transaksi meskipun saldo sudah mencukupi.
 
+  Meskipun demikian, Eventual Consistency memiliki keunggulan: paling cepat, paling tersedia, dan murah karena tidak memerlukan koordinasi antarserver. Model ini cocok untuk data yang toleran terhadap keterlambatan, seperti jumlah like.
+
   Sequential Consistency lebih sesuai karena menjaga urutan operasi pembacaan dan penulisan secara konsisten. Dari sisi bisnis, ketidaksesuaian saldo dapat menyebabkan kegagalan transaksi, meningkatkan keluhan, menurunkan kepercayaan pelanggan, serta berpotensi mengurangi pendapatan FoodGo.
 
   Selain itu, dibandingkan dengan jumlah like di media sosial yang masih dapat mentoleransi keterlambatan pembaruan, saldo e-wallet membutuhkan jaminan konsistensi lebih ketat karena berkaitan langsung dengan transaksi keuangan.
+
+  Kami juga mempertimbangkan strong consistency (linearizability) untuk seluruh data, tetapi biayanya tinggi karena setiap operasi harus dikoordinasikan antarserver sehingga latensi naik. Karena masalah hanya muncul ketika pelanggan membaca tulisannya sendiri, kami memilih solusi yang lebih ringan.
 
 - **Kesimpulan akhir & alasan:**
 

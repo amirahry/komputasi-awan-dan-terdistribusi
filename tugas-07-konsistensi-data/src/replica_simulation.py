@@ -5,7 +5,6 @@ Mensimulasikan delay replikasi dan masalah inconsistent read,
 lalu memperbaikinya dengan mekanisme Read-Your-Writes sederhana.
 """
 
-from platform import system
 import time
 import threading
 
